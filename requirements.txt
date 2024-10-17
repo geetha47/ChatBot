@@ -1,0 +1,6 @@
+streamlit
+sentence-transformers
+faiss-cpu
+torch
+transformers
+accelerate==1.0
