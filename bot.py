@@ -83,8 +83,8 @@ retriever_model = load_retriever_model()
 def build_faiss_index(preprocessed_lines):
     line_embeddings = retriever_model.encode(preprocessed_lines, convert_to_tensor=True)
     index = faiss.IndexFlatL2(line_embeddings.shape[1])
-    faiss.normalize_L2(line_embeddings.cpu().detach().numpy())
-    index.add(line_embeddings.cpu().detach().numpy())
+    normalized_embeddings = faiss.normalize_L2(line_embeddings.cpu().detach().numpy())
+    index.add(normalized_embeddings)  # Add normalized embeddings
     return index
 
 index = build_faiss_index(preprocessed_lines)
@@ -147,16 +147,19 @@ model_id ='meta-llama/Llama-3.1-8B-Instruct'
 # In[45]:
 
 
-@st.cache_resource
 def load_llama_model():
     model_id = "meta-llama/Llama-3.1-8B-Instruct"
-    return pipeline("text-generation", model=model_id, tokenizer=model_id, torch_dtype=torch.bfloat16, device_map="auto")
+    try:
+        return pipeline("text-generation", model=model_id, tokenizer=model_id, torch_dtype=torch.bfloat16, device=-1)
+    except Exception as e:
+        print(f"Error loading model: {e}")
+        return None
 
 
 # In[46]:
 
 
-llama_pipeline = llama_pipeline = load_llama_model()
+llama_pipeline = load_llama_model()
 
 
 # In[32]:
@@ -174,14 +177,21 @@ def correct_text_with_llama(text, query, max_new_tokens):
    #       llama_pipeline.tokenizer.eos_token_id,
    #       llama_pipeline.tokenizer.convert_tokens_to_ids("")
    #]
+    # Get eos_token_id from the tokenizer in the pipeline
     eos_token_id = llama_pipeline.tokenizer.eos_token_id
-    terminators = eos_token_id
+
+    # Check if eos_token_id is None
+    if eos_token_id is None:
+        pad_token_id = 0  # Use a default value if eos_token_id is None
+    else:
+        pad_token_id = eos_token_id  # Use eos_token_id as pad_token_id
+        
     repetition_penalty=1.2
     # Generate output from the LLaMA model
     output = llama_pipeline(
         messages,
         max_new_tokens=max_new_tokens,
-        eos_token_id=terminators,
+        pad_token_id=pad_token_id,
         do_sample=True,
         temperature=0.1,
         top_p=0.8,
@@ -189,7 +199,7 @@ def correct_text_with_llama(text, query, max_new_tokens):
     )
 
     # Extract the assistant's reply from the output
-    return output[0]['generated_text']
+    return output[0]['generated_text'] if output else "No response generated."
 
 
 
@@ -202,7 +212,7 @@ def generate_response(query, k, context_size):
     relevant_context = retrieve_relevant_passages_with_context(query, k, context_size)
     print(relevant_context)
     # Step 2: Pass the context to LLaMA to extract the specific relevant information
-    extracted_information = correct_text_with_llama(relevant_context, query, max_new_tokens=1024)
+    extracted_information = correct_text_with_llama(relevant_context, query, max_new_tokens=256)
     
     # Return the extracted information as the final response
     return extracted_information
