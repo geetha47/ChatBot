@@ -1,7 +1,7 @@
 streamlit
 sentence-transformers
 faiss-cpu
-torch==2.1.0
+torch
 
 transformers
 accelerate==1.0
