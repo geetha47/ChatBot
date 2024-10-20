@@ -3,9 +3,9 @@
 faiss-cpu
 sentence-transformers
 transformers
-torch==2.5.0
-torchvision==0.20.0
-torchaudio==2.5.0
+torch==2.5.0+cpu
+torchvision==0.20.0+cpu
+torchaudio==2.5.0+cpu
 accelerate==1.0
 huggingface_hub
 streamlit
