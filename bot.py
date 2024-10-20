@@ -99,7 +99,7 @@ index = build_faiss_index(preprocessed_lines)
 # In[48]:
 
 
-def retrieve_relevant_passages_with_context(query, k=3, context_size=15):
+def retrieve_relevant_passages_with_context(query, k=3, context_size=10):
     query_embedding = retriever_model.encode([query], convert_to_tensor=True)
     faiss.normalize_L2(query_embedding.cpu().detach().numpy())
     _, relevant_indices = index.search(query_embedding.cpu().detach().numpy(), k)
@@ -202,7 +202,7 @@ def generate_response(query, k, context_size):
     relevant_context = retrieve_relevant_passages_with_context(query, k, context_size)
     print(relevant_context)
     # Step 2: Pass the context to LLaMA to extract the specific relevant information
-    extracted_information = correct_text_with_llama(relevant_context, query, max_new_tokens=4096)
+    extracted_information = correct_text_with_llama(relevant_context, query, max_new_tokens=1024)
     
     # Return the extracted information as the final response
     return extracted_information
