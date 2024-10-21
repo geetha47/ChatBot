@@ -1,11 +1,11 @@
 
-
-faiss-cpu
-sentence-transformers
 transformers
-torch
-torchvision
-torchaudio
+datasets
+faiss-cpu
+torch==2.1
+torchvision==0.16
+torchaudio==2.1
+sentence-transformers
 accelerate==1.0
 huggingface_hub
 streamlit
