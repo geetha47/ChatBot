@@ -1,7 +1,7 @@
 
 transformers
 datasets
-faiss-gpu
+faiss-cpu
 torch
 torchvision
 torchaudio
