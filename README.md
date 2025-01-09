@@ -1,4 +1,4 @@
-University Chatbot Project
+#University Chatbot Project#
 
 This project involves developing an AI-powered chatbot designed to help university students find the information they need easily and efficiently. 🎓💬
 
